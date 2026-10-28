@@ -48,8 +48,8 @@ npm install
 
 Para acessar as áreas privadas (Carrinho, Pagamento, Perfil, Carteiras), utilize as seguintes credenciais fictícias:
 
-* **E-mail:** `colecionador@kurio.com`
-* **Palavra-passe:** `Kurio2026!`
+* **E-mail:** `usuario@kurio.com`
+* **Palavra-passe:** `123456`
 
 ##  Cenários de Teste e Mocks (MSW)
 
