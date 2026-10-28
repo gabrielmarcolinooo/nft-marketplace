@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 
 async function enableMocking() {
   const { worker } = await import('./mocks/browser')
-  return worker.start({ onUnhandledFrame: 'bypass' })
+  return worker.start({ onUnhandledRequest: 'bypass' })
 }
 
 enableMocking().then(() => {
