@@ -30,3 +30,41 @@ cd nft-marketplace
 
 # Instale as dependências
 npm install
+
+
+```
+
+Comandos Disponíveis
+npm run dev: Inicia o servidor de desenvolvimento com MSW ativo.
+
+npm run build: Compila a aplicação para produção.
+
+npm run preview: Inicia um servidor local para visualizar a build de produção.
+
+npm run lint: Executa a verificação de código (ESLint) e tipos (TypeScript).
+
+npm run test:e2e: Executa a suíte de testes E2E com Playwright em modo headless.
+
+npm run test:e2e:ui: Abre a interface interativa do Playwright.
+
+npm run lighthouse: Executa a auditoria do Lighthouse.
+
+Credenciais de Teste (Mock)
+Para aceder às áreas privadas (Carrinho, Pagamento, Perfil, Carteiras), utilize as seguintes credenciais fictícias:
+
+E-mail: colecionador@kurio.com
+
+Palavra-passe: Kurio2026!
+
+Cenários de Teste e Mocks (MSW)
+A aplicação utiliza o MSW para simular a API REST e o WebSocket (@mswjs/socket.io-binding). O MSW está ativo tanto em desenvolvimento como na build de demonstração.
+
+Para simular falhas específicas no fluxo:
+
+Cupão Inválido: Ao finalizar a compra, insira o código INVALIDO para forçar um erro de validação.
+
+Falha de Pagamento: Ao confirmar a compra, selecione a carteira "Reserva" para forçar uma transação recusada.
+
+Conflito de Disponibilidade: Aguarde 30 segundos na tela de checkout; um evento de WebSocket simulará que um dos NFTs esgotou ou mudou de preço, bloqueando a compra até atualização.
+
+Reset de Estado: Para limpar o banco de dados simulado e restaurar os dados iniciais, basta fazer logout e atualizar a página.
