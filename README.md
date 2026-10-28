@@ -17,8 +17,8 @@ Implementação do desafio Frontend de um Marketplace de NFTs, focado na experi�
 
 ##  Deploy
 
-- **Repositório:** (https://github.com/gabrielmarcolinooo/nft-marketplace)]
-- **URL Pública:** (https://nftmarketplacedesafio.netlify.app/)]
+- **Repositório:** https://github.com/gabrielmarcolinooo/nft-marketplace
+- **URL Pública:** https://nftmarketplacedesafio.netlify.app/
 
 ##  Instalação e Configuração
 
