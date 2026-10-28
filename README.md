@@ -36,19 +36,19 @@ npm install
 
 Comandos Disponíveis
 
-npm run dev: Inicia o servidor de desenvolvimento com MSW ativo.
+- npm run dev: Inicia o servidor de desenvolvimento com MSW ativo.
 
-npm run build: Compila a aplicação para produção.
+- npm run build: Compila a aplicação para produção.
 
-npm run preview: Inicia um servidor local para visualizar a build de produção.
+- npm run preview: Inicia um servidor local para visualizar a build de produção.
 
-npm run lint: Executa a verificação de código (ESLint) e tipos (TypeScript).
+- npm run lint: Executa a verificação de código (ESLint) e tipos (TypeScript).
 
-npm run test:e2e: Executa a suíte de testes E2E com Playwright em modo headless.
+- npm run test:e2e: Executa a suíte de testes E2E com Playwright em modo headless.
 
-npm run test:e2e:ui: Abre a interface interativa do Playwright.
+- npm run test:e2e:ui: Abre a interface interativa do Playwright.
 
-npm run lighthouse: Executa a auditoria do Lighthouse.
+- npm run lighthouse: Executa a auditoria do Lighthouse.
 
 Credenciais de Teste (Mock)
 Para aceder às áreas privadas (Carrinho, Pagamento, Perfil, Carteiras), utilize as seguintes credenciais fictícias:
