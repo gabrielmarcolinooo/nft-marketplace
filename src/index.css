@@ -1,0 +1,52 @@
+@config "../tailwind.config.js";
+@import "tailwindcss";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
+
+:root {
+  font-family: 'Space Mono', ui-monospace, monospace;
+  color: #e9e1d8;
+  background: #140d0a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; background: #140d0a; scroll-behavior: smooth; }
+body { min-width: 320px; min-height: 100vh; margin: 0; background: #140d0a; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { color: #160d08; background: #df8b42; }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #140d0a; }
+::-webkit-scrollbar-thumb { border: 2px solid #140d0a; border-radius: 999px; background: #4a2918; }
+
+.kurio-range {
+  appearance: none;
+  height: 18px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.kurio-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #140d0a;
+  border-radius: 999px;
+  background: #e58a3c;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.kurio-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #140d0a;
+  border-radius: 999px;
+  background: #e58a3c;
+  cursor: pointer;
+  pointer-events: auto;
+}
