@@ -1,4 +1,4 @@
-```markdown
+
 # Kurio - NFT Marketplace
 
 Implementação do desafio Frontend de um Marketplace de NFTs, focado na experiência de descoberta, compra e gestão de conta do colecionador. O projeto é responsivo (desktop e mobile) e consome uma API simulada integralmente pelo lado do cliente.
@@ -31,8 +31,8 @@ cd nft-marketplace
 
 # Instale as dependências
 npm install
-
 ```
+
 
 ##  Comandos Disponíveis
 
@@ -62,6 +62,4 @@ A aplicação utiliza o MSW para simular a API REST e o WebSocket (`@mswjs/socke
 * **Conflito de Disponibilidade:** Aguarde 30 segundos na tela de checkout; um evento de WebSocket simulará que um dos NFTs esgotou ou mudou de preço, bloqueando a compra até atualização.
 * **Reset de Estado:** Para limpar o banco de dados simulado e restaurar os dados iniciais, basta fazer logout e atualizar a página.
 
-```
 
-```
