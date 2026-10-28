@@ -1,40 +1,67 @@
 # Arquitetura e Decisões Técnicas - Kurio NFT Marketplace
 
-Este documento detalha as escolhas arquiteturais, contratos de API, estratégias de estado, tempo real e desvios de design adotados no desenvolvimento do Kurio NFT Marketplace.
+Este documento detalha as escolhas arquiteturais, contratos de API, políticas de estado, tempo real, limitações conhecidas e desvios de design do **Kurio NFT Marketplace**.
 
-## 1. Stack e Organização do Projeto
-O projeto foi estruturado utilizando a seguinte stack obrigatória:
-- **Interface:** React + TypeScript com Vite como bundler.
-- **Roteamento:** TanStack Router (com suporte a rotas dinâmicas e proteção de páginas privadas).
-- **Gerenciamento de Estado Remoto:** TanStack Query para cache, sincronização e mutações.
-- **Cliente HTTP:** Axios para todas as chamadas de API.
-- **Mocking (MSW):** Mock Service Worker interceptando requisições REST e simulando o protocolo Socket.IO via `@mswjs/socket.io-binding`.
-- **Estilização:** Tailwind CSS combinado com componentes adaptados do shadcn/ui.
-- **Qualidade e Testes:** Playwright para testes E2E/regressão visual e Lighthouse para auditorias de performance.
+---
 
-## 2. Estratégia de Cache e Sincronização (TanStack Query)
-- **Stale Time & Refetch:** Configurado com *staleTime* moderado para dados estáticos (perfil e carteiras) e revalidação inteligente em mutações do catálogo e do carrinho.
-- **Atualizações Otimistas (Optimistic Updates):** Aplicadas nas ações de adicionar/remover favoritos e itens do carrinho. Caso a mutação falle no servidor simulado, o TanStack Query executa um *rollback* automático do cache para manter a consistência visual.
-- **Invalidação Cirúrgica:** Após a confirmação bem-sucedida de um pedido (`POST /api/orders`), as queries de carrinho e catálogo são invalidadas para refletir imediatamente a baixa de estoque.
+## 1. Contratos REST e Eventos (Socket.IO)
 
-## 3. Tempo Real e Reconciliação (Socket.IO)
-A aplicação escuta eventos em tempo real (`nft.updated`, `order.updated`) utilizando o cliente oficial do Socket.IO conectado ao worker do MSW:
-- **Injeção de Cache:** Os eventos recebidos atualizam diretamente o cache do TanStack Query (`queryClient.setQueryData`), evitando *refetches* desnecessários de rede.
-- **Validação de Versão / Conflito:** Para cumprir a regra de não aceitar cotações desatualizadas, se um evento `nft.updated` alterar o preço de um item presente no carrinho, a aplicação invalida a cotação atual e bloqueia o botão de pagamento até que o usuário revise o novo valor.
-- **Ciclo de Vida:** Subscrições e ouvintes de sockets são limpos no encerramento do componente (`useEffect cleanup`) e totalmente desconectados em caso de *logout*, evitando vazamento de dados entre usuários diferentes.
+### 1.1. APIs REST Principais (Mock Service Worker - MSW)
+- **Autenticação:**
+  * `POST /api/auth/login` — Autentica o utilizador através de credenciais fictícias e devolve um token de sessão simulado.
+  * `POST /api/auth/logout` — Invalida a sessão atual no cliente.
+- **Catálogo de NFTs:**
+  * `GET /api/nfts` — Retorna a listagem de NFTs com suporte a paginação, ordenação (`sort`), filtragem por categoria (`category`), faixa de preço (`minPrice`, `maxPrice`) e termo de busca (`search`).
+  * `GET /api/nfts/:id` — Retorna os detalhes de um NFT específico.
+- **Carrinho e Cotações:**
+  * `GET /api/cart` — Retorna os itens ativos no carrinho do utilizador autenticado e o subtotal em ETH.
+  * `POST /api/cart` — Adiciona um novo ativo ao carrinho.
+  * `DELETE /api/cart/:id` — Remove um item do carrinho.
+  * `POST /api/cart/coupon` — Valida códigos promocionais (ex: cupom inválido simulado).
+- **Pedidos e Checkout:**
+  * `POST /api/orders` — Cria um novo pedido de compra. Requer chave de idempotência no cabeçalho (`X-Idempotency-Key`) para prevenir dupla cobrança em caso de falhas de rede.
 
-## 4. Política de Sessão
-- A autenticação baseia-se em um token simulado armazenado no `localStorage`.
-- Um interceptor do Axios monitora respostas `401 Unauthorized`. Caso ocorra expiração da sessão ou logout, o sistema limpa o cache local (`queryClient.clear()`), desconecta as instâncias de socket e redireciona o usuário para a tela de login, preservando o contexto de retorno.
+### 1.2. Eventos em Tempo Real (`Socket.IO`)
+A aplicação escuta os seguintes eventos emitidos pelo worker do MSW:
+- **`nft.updated`**: Atualiza instantaneamente o preço, status de disponibilidade e metadados no catálogo, na página de detalhes e no resumo do carrinho.
+- **`order.updated`**: Notifica a alteração de estado de um pedido pendente (confirmação ou recusa com estados terminais).
 
-## 5. Contratos da API (Resumo dos Recursos Mocks)
-- **Autenticação:** `POST /api/auth/login`, `POST /api/auth/register`, `POST /api/auth/logout`.
-- **Catálogo:** `GET /api/nfts` (suporta paginação, ordenação, busca textual e filtros combinados por categoria/preço) e `GET /api/nfts/:id`.
-- **Carrinho e Cotação:** `GET /api/cart`, `POST /api/cart`, `DELETE /api/cart/:id` e validação de cupons.
-- **Pedidos:** `POST /api/orders` (suporta chave de idempotência no header para evitar cobranças duplicadas em caso de timeout).
-- **Perfil e Carteiras:** Endpoints de consulta e mutação de dados do usuário e endereços de carteiras (principal e secundária).
+---
 
-## 6. Decisões de UX, Acessibilidade e Desvios do Figma
-- **Foco e Teclado:** Adicionados indicadores visuais de foco (`focus-visible`) em todos os elementos interativos para garantir conformidade com as diretrizes de acessibilidade WCAG (navegação completa por teclado em modais e drawers).
-- **Skeletons (Shimmer Effect):** Implementados nas listagens e detalhes para prevenir saltos de layout (*Cumulative Layout Shift - CLS*) durante o carregamento assíncrono.
-- **Responsividade Mobile:** O layout adapta-se fluidamente para viewports de 390px, incorporando uma barra de navegação inferior fixa (Bottom Nav), gavetas de filtros deslizantes e cartões empilhados no checkout.
+## 2. Política de Sessão
+- **Armazenamento:** Baseada em um token de acesso simulado e persistido no `localStorage` do navegador, associado ao objeto do utilizador logado.
+- **Ciclo de Vida e Expiração:** Respostas `401 Unauthorized` da API acionam automaticamente um interceptor do Axios que limpa o cache local (`queryClient.clear()`), encerra as instâncias ativas de socket e redireciona o utilizador para o modal de autenticação.
+- **Isolamento:** A troca de utilizador limpa integralmente o escopo da sessão anterior para evitar o vazamento de dados de carrinho e carteiras entre diferentes contas.
+
+---
+
+## 3. Estado do Carrinho e Idempotência
+- **Persistência Local e Remota:** O estado do carrinho é gerido de forma centralizada pelo TanStack Query, sincronizado com o banco de dados simulado do MSW.
+- **Validação de Cotação:** Caso um item do carrinho sofra alteração de preço ou esgote via evento de Socket.IO (`nft.updated`), a aplicação sinaliza visualmente a alteração e **bloqueia o botão de pagamento** no checkout até que o utilizador aceite a nova cotação.
+- **Idempotência no Checkout:** Pedidos enviados possuem uma chave de idempotência gerada por sessão, garantindo que interrupções de conexão não dupliquem transações financeiras após a reconexão.
+
+---
+
+## 4. Estratégia de Cache (TanStack Query)
+- **Stale Time & Revalidação:** Dados estáticos e coleções possuem um tempo de cache otimizado para evitar requisições redundantes de rede. Mutações (como adicionar ao carrinho ou favoritar) utilizam **atualizações otimistas (*optimistic updates*)** com reversão automática (*rollback*) em caso de falha simulada.
+- **Invalidação Cirúrgica:** Após mutações críticas (como a finalização de um pedido), as queries associadas ao catálogo e ao carrinho são invalidadas imediatamente para refletir a baixa de estoque correta.
+
+---
+
+## 5. Reconciliação entre REST e Socket.IO
+- **Tolerância a Duplicatas e Eventos Atrasados:** Os manipuladores de eventos de socket registram versões e carimbos de data/hora. Eventos duplicados ou atrasados (que chegam após um estado mais recente) são descartados para evitar regressão visual.
+- **Reconexão de Rede:** Após qualquer interrupção e restabelecimento da conexão WebSocket, a aplicação executa automaticamente uma chamada de sincronização REST (`refetch`) nos recursos ativos para garantir consistência de dados sem criar estados duplicados.
+
+---
+
+## 6. Limitações Conhecidas
+- O ecossistema de dados e transações é estritamente simulado em ambiente cliente (*client-side*) através do Mock Service Worker (MSW), não havendo persistência real em banco de dados em nuvem ou conexão com smart contracts reais da blockchain Ethereum.
+- O fluxo de pagamento simula carteiras criptográficas e saldos fictícios para fins estritamente de demonstração académica e avaliação técnica.
+
+---
+
+## 7. Decisões de UX e Desvios do Figma
+
+**Acessibilidade e Foco:** Implementação rigorosa de indicadores visuais de foco (`focus-visible`) e navegação completa por teclado em modais, gavetas (*drawers*) e menus flutuantes.
+**Prevenção de CLS (*Cumulative Layout Shift*):** Utilização de componentes *Skeleton* (`NFTSkeleton.tsx`) durante as requisições assíncronas para manter a estabilidade visual da grelha de NFTs.
+**Desvios do Figma:** Fizemos pequenos ajustes responsivos em telas menores de 390px para melhorar a distribuição dos filtros e dos cartões sem quebrar o layout. Além disso, reposicionamos alguns elementos estruturais (divs) que estavam desalinhados no protótipo original do Figma.s
