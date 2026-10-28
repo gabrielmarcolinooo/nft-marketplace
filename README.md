@@ -57,9 +57,7 @@ A aplicação utiliza o MSW para simular a API REST e o WebSocket (`@mswjs/socke
 
 **Para simular falhas específicas no fluxo:**
 
-* **Cupom Inválido:** Ao finalizar a compra, insira o código `INVALIDO` para forçar um erro de validação.
-* **Falha de Pagamento:** Ao confirmar a compra, selecione a carteira "Reserva" para forçar uma transação recusada.
+* **Cupom Inválido:** Ao finalizar a compra, insira o código `INVALIDO`, o sistema deve retornar um alerta de erro amigável na UI indicando que o cupom não é válido.
 * **Conflito de Disponibilidade:** Aguarde 30 segundos na tela de checkout; um evento de WebSocket simulará que um dos NFTs esgotou ou mudou de preço, bloqueando a compra até atualização.
-* **Reset de Estado:** Para limpar o banco de dados simulado e restaurar os dados iniciais, basta fazer logout e atualizar a página.
 
 
