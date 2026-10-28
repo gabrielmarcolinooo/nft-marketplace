@@ -35,6 +35,7 @@ npm install
 ```
 
 Comandos Disponíveis
+
 npm run dev: Inicia o servidor de desenvolvimento com MSW ativo.
 
 npm run build: Compila a aplicação para produção.
